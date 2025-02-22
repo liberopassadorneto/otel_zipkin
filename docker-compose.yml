@@ -1,0 +1,24 @@
+services:
+  servicea:
+    build: ./serviceA
+    ports:
+      - "8080:8080"
+    environment:
+      - SERVICE_B_URL=http://serviceb:8081/cep
+      - ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans
+    depends_on:
+      - serviceb
+      - zipkin
+
+  serviceb:
+    build: ./serviceB
+    ports:
+      - "8081:8081"
+    environment:
+      - WEATHER_API_KEY=df173eb3e8884223b5d132352251502
+      - ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans
+
+  zipkin:
+    image: openzipkin/zipkin
+    ports:
+      - "9411:9411"
