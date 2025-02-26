@@ -9,6 +9,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"time"
 
@@ -160,6 +161,7 @@ func getCityByCEP(ctx context.Context, cep string) (string, error) {
 }
 
 func getTemperature(ctx context.Context, city string) (float64, error) {
+	encodedCity := url.QueryEscape(city)
 	tracer := otel.Tracer("serviceB")
 	ctx, span := tracer.Start(ctx, "getTemperature")
 	span.SetAttributes(attribute.String("city", city))
@@ -169,7 +171,7 @@ func getTemperature(ctx context.Context, city string) (float64, error) {
 	if apiKey == "" {
 		return 0, fmt.Errorf("WEATHER_API_KEY not set")
 	}
-	weatherURL := fmt.Sprintf("http://api.weatherapi.com/v1/current.json?key=%s&q=%s", apiKey, city)
+	weatherURL := fmt.Sprintf("http://api.weatherapi.com/v1/current.json?key=%s&q=%s", apiKey, encodedCity)
 	req, err := http.NewRequestWithContext(ctx, "GET", weatherURL, nil)
 	if err != nil {
 		return 0, err
